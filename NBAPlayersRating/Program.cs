@@ -11,31 +11,55 @@
     {
         static void Main()
         {
+            int maxPlayedYears = int.MinValue;
+            string inputYears = string.Empty;
+            bool isValidYears = false;
+
+            int minQualifyRating = int.MinValue;
+            string inputRating = string.Empty;
+            bool isValidRating = false;
+
             StringBuilder stringBuilder = new StringBuilder();
             int currentYear = DateTime.UtcNow.Year;
 
-            string pathToDataJSON = Console.ReadLine();
-            int maxPlayedYears = int.Parse(Console.ReadLine());
-            int minQualifyRating = int.Parse(Console.ReadLine());
-            string dataSaveDirectory = Console.ReadLine();
+            Console.WriteLine(Phrase.hello);  
 
-            StreamReader reader = new StreamReader(pathToDataJSON);
-            string dataJSON = reader.ReadToEnd();
-            List<Player> allPlayers = JsonConvert.DeserializeObject<List<Player>>(dataJSON);
-
-            List<Player> selectedPlayers = allPlayers
-                .Where(player => player.Rating >= minQualifyRating && player.PlayingSince >= currentYear - maxPlayedYears)
-                .OrderByDescending(player => player.Rating)
-                .ToList();
-
-            stringBuilder.AppendLine("Name, Rating");
-
-            foreach (var player in selectedPlayers)
+            while (!isValidYears)
             {
-                stringBuilder.AppendLine($"{player.Name}, {player.Rating}");
+                Console.Write(Phrase.maxPlayedPhrase);
+                inputYears = Console.ReadLine();
+                isValidYears = int.TryParse(inputYears, out maxPlayedYears);
             }
 
-            File.AppendAllText(dataSaveDirectory, stringBuilder.ToString());
+            while (!isValidRating)
+            {
+                Console.Write(Phrase.minQualifyPfrase);
+                inputRating = Console.ReadLine();
+                isValidRating = int.TryParse(inputRating, out minQualifyRating);
+            }
+
+            using (StreamReader reader = new StreamReader(Routes.pathToDataJSON))
+            {
+                string dataJSON = reader.ReadToEnd();
+                List<Player> allPlayers = JsonConvert.DeserializeObject<List<Player>>(dataJSON);
+
+                List<Player> selectedPlayers = allPlayers
+               .Where(player => player.Rating >= minQualifyRating && player.PlayingSince >= currentYear - maxPlayedYears)
+               .OrderByDescending(player => player.Rating)
+               .ToList();
+
+
+                stringBuilder.AppendLine("Name, Rating");
+
+                foreach (var player in selectedPlayers)
+                {
+                    stringBuilder.AppendLine($"{player.Name}, {player.Rating}");
+                }
+            }
+
+            File.WriteAllText(Routes.dataSaveDirectory, stringBuilder.ToString());
+
+            Console.WriteLine(Phrase.exit);
         }
     }
 }
